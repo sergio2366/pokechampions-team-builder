@@ -67,7 +67,11 @@ function norm(s) {
 }
 
 function display(slug) {
-  return slug.split('-').map(w => w[0].toUpperCase() + w.slice(1)).join(' ');
+  return slug
+    .split('-')
+    .filter(Boolean)
+    .map(w => w[0].toUpperCase() + w.slice(1))
+    .join(' ');
 }
 
 function spriteUrl(id) {
