@@ -187,9 +187,13 @@ async function loadSpeciesIndex() {
 }
 
 async function loadItems() {
-  const j = await getJSON(`${API}/item?limit=2500`);
-  j.results.forEach(r => { state.itemMap[display(r.name)] = r.name; });
-  renderItemList();
+  const pageSize = 500;
+  for (let offset = 0; ; offset += pageSize) {
+    const j = await getJSON(`${API}/item?limit=${pageSize}&offset=${offset}`);
+    j.results.forEach(r => { state.itemMap[display(r.name)] = r.name; });
+    renderItemList();
+    if (!j.next) break;
+  }
 }
 
 async function itemIcon(name) {
@@ -581,7 +585,7 @@ async function init() {
   loadSpeciesIndex()
     .then(() => renderSlots())
     .catch(() => flash('No se pudo cargar la lista de Pokémon (PokeAPI)'));
-  loadItems().catch(() => flash('No se pudo cargar la lista de objetos (PokeAPI)'));
+  loadItems().catch(err => flash(`No se pudo cargar la lista de objetos: ${err.message}`));
 }
 
 init();
