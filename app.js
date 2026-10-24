@@ -1,9 +1,10 @@
 // Constructor de equipos Pokémon Champions.
-// Datos: PokeAPI (en tiempo de ejecución). Equipos guardados: localStorage.
+// Datos: PokeAPI (en tiempo de ejecución) + data/regulations.js (lista por regulación).
+// Equipos guardados: localStorage.
 
 const API = 'https://pokeapi.co/api/v2';
 const SLOT_COUNT = 6;
-const STORE_KEY = 'pc-teams-v1';
+const STORE_KEY = 'pc-teams-v2';
 
 // Reglas de EVs (serie principal). Ajustar a las reglas reales de Pokémon Champions.
 const EV_MAX_STAT = 252;
@@ -23,10 +24,15 @@ const STAT_FROM_API = {
   hp: 'hp', attack: 'atk', defense: 'def', 'special-attack': 'spa', 'special-defense': 'spd', speed: 'spe',
 };
 
+const REG = window.REGULATIONS;
+
 const state = {
+  regulation: REG.current,
   team: blankTeam(),
-  speciesMap: {}, // "Pikachu" -> "pikachu"
-  details: {},    // slug -> { types, base, abilities, moves, sprite }
+  speciesMap: {},   // "Pikachu" -> "pikachu"
+  itemMap: {},      // "Choice Scarf" -> "choice-scarf"
+  itemSprites: {},  // "Choice Scarf" -> url
+  details: {},      // slug -> { types, base, abilities, moves, sprite }
 };
 
 // ---------- Utilidades ----------
@@ -50,6 +56,10 @@ function esc(s) {
   return String(s ?? '').replace(/[&<>"']/g, c => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
   })[c]);
+}
+
+function norm(s) {
+  return String(s).toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
 function display(slug) {
@@ -81,21 +91,90 @@ function flash(msg) {
   flashTimer = setTimeout(() => { el.textContent = ''; }, 2500);
 }
 
+// ---------- Regulación ----------
+
+function currentReg() {
+  return REG.list.find(r => r.id === state.regulation) || REG.list[0];
+}
+
+function allowedSet(reg) {
+  if (!reg._set) reg._set = new Set(reg.pokemon.map(norm));
+  return reg._set;
+}
+
+// Acepta la especie base y sus formas (p. ej. "toxtricity-amped" -> Toxtricity).
+function isAllowedSpecies(species) {
+  const reg = currentReg();
+  if (!reg.pokemon) return true;
+  const slug = state.speciesMap[species];
+  if (!slug) return false;
+  const set = allowedSet(reg);
+  return set.has(norm(species)) || set.has(norm(slug.split('-')[0]));
+}
+
+function renderRegulationSelect() {
+  $('#reg-select').innerHTML = REG.list
+    .map(r => `<option value="${esc(r.id)}" ${r.id === state.regulation ? 'selected' : ''}>${esc(r.name)}</option>`)
+    .join('');
+}
+
+function renderRegulationNote() {
+  const reg = currentReg();
+  const dates = `${reg.start} → ${reg.end}`;
+  $('#reg-note').textContent = reg.complete
+    ? `${reg.name}: ${dates}.`
+    : `${reg.name}: ${dates}. ${reg.note}`;
+}
+
+function renderSpeciesList() {
+  $('#dl-species').innerHTML = Object.keys(state.speciesMap)
+    .filter(n => isAllowedSpecies(n))
+    .map(n => `<option value="${esc(n)}">`)
+    .join('');
+}
+
+function renderItemList() {
+  const reg = currentReg();
+  const names = reg.items ?? Object.keys(state.itemMap);
+  $('#dl-items').innerHTML = names.map(n => `<option value="${esc(n)}">`).join('');
+}
+
 // ---------- Datos (PokeAPI) ----------
 
 async function loadSpeciesIndex() {
   const j = await getJSON(`${API}/pokemon?limit=2000`);
-  const dl = $('#dl-species');
-  dl.innerHTML = j.results.map(r => {
-    const name = display(r.name);
-    state.speciesMap[name] = r.name;
-    return `<option value="${esc(name)}">`;
-  }).join('');
+  j.results.forEach(r => { state.speciesMap[display(r.name)] = r.name; });
+  renderSpeciesList();
 }
 
 async function loadItems() {
   const j = await getJSON(`${API}/item?limit=2500`);
-  $('#dl-items').innerHTML = j.results.map(r => `<option value="${esc(display(r.name))}">`).join('');
+  j.results.forEach(r => { state.itemMap[display(r.name)] = r.name; });
+  renderItemList();
+}
+
+async function itemIcon(name) {
+  if (!name) return '';
+  if (!(name in state.itemSprites)) {
+    const slug = state.itemMap[name];
+    if (!slug) return '';
+    try {
+      const j = await getJSON(`${API}/item/${slug}`);
+      state.itemSprites[name] = j.sprites?.default || '';
+    } catch {
+      state.itemSprites[name] = '';
+    }
+  }
+  return state.itemSprites[name];
+}
+
+async function refreshItemIcon(i) {
+  const art = document.querySelector(`.slot[data-slot="${i}"]`);
+  if (!art) return;
+  const img = art.querySelector('.item-icon');
+  const url = await itemIcon(state.team[i].item);
+  img.src = url;
+  img.hidden = !url;
 }
 
 async function loadDetail(species) {
@@ -144,17 +223,22 @@ function slotHTML(i, s) {
   const d = detailFor(s.species);
   const abilities = d ? d.abilities : (s.ability ? [s.ability] : []);
   const moveOpts = (d ? d.moves : []).map(m => `<option value="${esc(m)}">`).join('');
+  const illegal = s.species && !isAllowedSpecies(s.species);
 
   return `
-  <article class="slot" data-slot="${i}">
+  <article class="slot${illegal ? ' illegal' : ''}" data-slot="${i}">
     <div class="slot-head">
       <span class="num">${i + 1}</span>
       ${d?.sprite ? `<img src="${esc(d.sprite)}" alt="" width="48" height="48">` : ''}
       <input class="species" data-f="species" list="dl-species" value="${esc(s.species)}" placeholder="Pokémon">
     </div>
-    <label>Objeto
-      <input data-f="item" list="dl-items" value="${esc(s.item)}" placeholder="Objeto">
-    </label>
+    ${illegal ? `<small class="warn">No está en ${esc(state.regulation)}</small>` : ''}
+    <div class="item-row">
+      <img class="item-icon" alt="" width="24" height="24" hidden>
+      <label>Objeto
+        <input data-f="item" list="dl-items" value="${esc(s.item)}" placeholder="Objeto">
+      </label>
+    </div>
     <label>Habilidad
       <select data-f="ability">
         ${abilities.map(a => `<option ${a === s.ability ? 'selected' : ''}>${esc(a)}</option>`).join('')}
@@ -207,11 +291,15 @@ function renderSlot(i) {
   tmp.innerHTML = slotHTML(i, state.team[i]);
   $('#slots').children[i].replaceWith(tmp.firstElementChild);
   updateSlotMeta(i);
+  refreshItemIcon(i);
 }
 
 function renderSlots() {
   $('#slots').innerHTML = state.team.map((s, i) => slotHTML(i, s)).join('');
-  state.team.forEach((_, i) => updateSlotMeta(i));
+  state.team.forEach((_, i) => {
+    updateSlotMeta(i);
+    refreshItemIcon(i);
+  });
 }
 
 function updateOutput() {
@@ -227,7 +315,7 @@ function renderTeamList() {
   $('#team-list').innerHTML = names.length
     ? names.map(n => `
       <li>
-        <span>${esc(n)} <small>(${all[n].filter(s => s.species).length} Pokémon)</small></span>
+        <span>${esc(n)} <small>(${esc(all[n].regulation)}, ${all[n].team.filter(s => s.species).length} Pokémon)</small></span>
         <span>
           <button type="button" data-act="load" data-name="${esc(n)}">Cargar</button>
           <button type="button" data-act="del" data-name="${esc(n)}">Borrar</button>
@@ -236,12 +324,26 @@ function renderTeamList() {
     : '<li>No hay equipos guardados.</li>';
 }
 
-// ---------- Acciones de equipo ----------
+// ---------- Acciones ----------
 
 async function preloadTeam(team) {
   await Promise.all(team.map(s => s.species
     ? loadDetail(s.species).catch(() => null)
     : null));
+}
+
+function refreshRegulationViews() {
+  renderRegulationNote();
+  renderSpeciesList();
+  renderItemList();
+  renderSlots();
+  updateOutput();
+}
+
+function onRegulationChanged(id) {
+  state.regulation = id;
+  refreshRegulationViews();
+  flash(`Regulación ${id}`);
 }
 
 async function onSpeciesChanged(i, value) {
@@ -253,6 +355,9 @@ async function onSpeciesChanged(i, value) {
   if (state.speciesMap[s.species]) {
     const d = await loadDetail(s.species);
     s.ability = d.abilities[0] || '';
+  }
+  if (s.species && !isAllowedSpecies(s.species)) {
+    flash(`${s.species} no está en ${state.regulation}`);
   }
   renderSlot(i);
   updateOutput();
@@ -269,7 +374,7 @@ function setSaved(obj) {
 function saveTeam() {
   const name = $('#team-name').value.trim() || 'Equipo sin nombre';
   const all = getSaved();
-  all[name] = structuredClone(state.team);
+  all[name] = { regulation: state.regulation, team: structuredClone(state.team) };
   setSaved(all);
   renderTeamList();
   flash(`Guardado: ${name}`);
@@ -277,12 +382,14 @@ function saveTeam() {
 
 async function loadTeam(name) {
   const all = getSaved();
-  if (!all[name]) return;
-  state.team = structuredClone(all[name]);
+  const entry = all[name];
+  if (!entry) return;
+  state.regulation = REG.list.some(r => r.id === entry.regulation) ? entry.regulation : REG.current;
+  renderRegulationSelect();
+  state.team = structuredClone(entry.team);
   $('#team-name').value = name;
   await preloadTeam(state.team);
-  renderSlots();
-  updateOutput();
+  refreshRegulationViews();
   flash(`Cargado: ${name}`);
 }
 
@@ -348,6 +455,10 @@ $('#slots').addEventListener('change', async e => {
     await onSpeciesChanged(i, e.target.value);
     return;
   }
+  if (f === 'item') {
+    s.item = e.target.value.trim();
+    refreshItemIcon(i);
+  }
   if (f === 'ability') s.ability = e.target.value;
   if (f === 'nature') {
     s.nature = e.target.value;
@@ -355,6 +466,8 @@ $('#slots').addEventListener('change', async e => {
   }
   updateOutput();
 });
+
+$('#reg-select').addEventListener('change', e => onRegulationChanged(e.target.value));
 
 $('#btn-new').addEventListener('click', newTeam);
 $('#btn-save').addEventListener('click', saveTeam);
@@ -399,12 +512,16 @@ $('#btn-import-go').addEventListener('click', async () => {
 // ---------- Init ----------
 
 async function init() {
+  renderRegulationSelect();
+  renderRegulationNote();
   renderSlots();
   updateOutput();
   renderTeamList();
 
-  loadSpeciesIndex().catch(() => flash('No se pudo cargar la lista de Pokémon (PokeAPI)'));
-  loadItems().catch(() => {});
+  loadSpeciesIndex()
+    .then(() => renderSlots())
+    .catch(() => flash('No se pudo cargar la lista de Pokémon (PokeAPI)'));
+  loadItems().catch(() => flash('No se pudo cargar la lista de objetos (PokeAPI)'));
 }
 
 init();

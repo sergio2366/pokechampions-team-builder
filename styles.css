@@ -65,9 +65,11 @@ main {
   display: flex;
   gap: 10px;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
   flex-wrap: wrap;
 }
+.reg-label { display: flex; gap: 6px; align-items: center; color: var(--muted); font-size: 13px; }
+.reg-note { color: var(--muted); font-size: 13px; margin: 0 0 16px; }
 #status { color: var(--accent); font-size: 13px; margin-left: auto; }
 
 input, select, textarea, button {
@@ -101,6 +103,7 @@ button.primary {
   flex-direction: column;
   gap: 8px;
 }
+.slot.illegal { border-color: var(--bad); }
 .slot-head { display: flex; gap: 8px; align-items: center; }
 .slot-head .species { flex: 1; font-weight: 600; }
 .num {
@@ -112,6 +115,10 @@ button.primary {
   place-items: center;
   font-size: 13px;
 }
+.warn { color: var(--bad); font-size: 12px; }
+.item-row { display: flex; gap: 8px; align-items: flex-end; }
+.item-row label { flex: 1; }
+.item-icon { width: 24px; height: 24px; margin-bottom: 4px; }
 .slot label {
   display: flex;
   flex-direction: column;

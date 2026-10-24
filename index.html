@@ -25,10 +25,14 @@
     <section id="builder">
       <div class="toolbar">
         <input id="team-name" placeholder="Nombre del equipo">
+        <label class="reg-label">Regulación
+          <select id="reg-select"></select>
+        </label>
         <button id="btn-new" type="button">Nuevo</button>
         <button id="btn-save" class="primary" type="button">Guardar</button>
         <div id="status" role="status"></div>
       </div>
+      <p id="reg-note" class="reg-note"></p>
       <div id="slots" class="slots"></div>
 
       <section id="paste-panel" class="paste-panel">
@@ -66,6 +70,7 @@
   <datalist id="dl-species"></datalist>
   <datalist id="dl-items"></datalist>
 
+  <script src="data/regulations.js"></script>
   <script src="pokepaste.js"></script>
   <script src="app.js"></script>
 </body>
