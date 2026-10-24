@@ -1,5 +1,5 @@
 // Datos de regulaciones de Pokémon Champions.
-// Lista parcial de M-C: faltan los Pokémon a partir de #0858. Completar antes de dar por buena.
+// M-C: lista construida desde Serebii. Pendiente: confirmar #0859 (Impidimp) y #0860 (Morgrem).
 window.REGULATIONS = {
   current: 'M-C',
   list: [
@@ -9,7 +9,7 @@ window.REGULATIONS = {
       start: '2026-09-09',
       end: '2026-12-02',
       complete: false,
-      note: 'Lista incompleta: faltan Pokémon a partir de Hatterene (#0858).',
+      note: 'Lista pendiente de revisión: puede faltar algún Pokémon (p. ej. Impidimp y Morgrem).',
       sources: [
         'https://serebii.net/pokemonchampions/rankedbattle/regulationm-c.shtml',
         'https://www.serebii.net/pokemonchampions/recruit/regularrosterm-c.shtml',
@@ -43,6 +43,12 @@ window.REGULATIONS = {
         // Añadidos en M-C según la página de Pokémon recién habilitados de Serebii.
         'Perrserker', "Sirfetch'd", 'Pincurchin', 'Indeedee', 'Pawmot', 'Arboliva', 'Squawkabilly',
         'Mabosstiff', 'Baxcalibur',
+        // Lista de Serebii (regular roster) a partir de Grimmsnarl.
+        'Grimmsnarl', 'Mr. Rime', 'Runerigus', 'Alcremie', 'Falinks', 'Morpeko', 'Dragapult', 'Wyrdeer',
+        'Kleavor', 'Basculegion', 'Sneasler', 'Overqwil', 'Meowscarada', 'Skeledirge', 'Quaquaval',
+        'Maushold', 'Garganacl', 'Armarouge', 'Ceruledge', 'Bellibolt', 'Scovillain', 'Espathra',
+        'Tinkaton', 'Palafin', 'Orthworm', 'Glimmora', 'Houndstone', 'Annihilape', 'Farigiraf',
+        'Kingambit', 'Gholdengo', 'Sinistcha', 'Archaludon', 'Hydrapple',
       ],
       // null = todos los objetos disponibles en la PokeAPI (la lista de objetos de M-C no está completa).
       items: null,

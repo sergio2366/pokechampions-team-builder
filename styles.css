@@ -70,6 +70,7 @@ main {
 }
 .reg-label { display: flex; gap: 6px; align-items: center; color: var(--muted); font-size: 13px; }
 .reg-note { color: var(--muted); font-size: 13px; margin: 0 0 16px; }
+.muted { color: var(--muted); }
 #status { color: var(--accent); font-size: 13px; margin-left: auto; }
 
 input, select, textarea, button {
@@ -106,6 +107,17 @@ button.primary {
 .slot.illegal { border-color: var(--bad); }
 .slot-head { display: flex; gap: 8px; align-items: center; }
 .slot-head .species { flex: 1; font-weight: 600; }
+.pick-btn {
+  padding: 2px;
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  flex: none;
+}
+.pick-btn img { width: 56px; height: 56px; image-rendering: pixelated; }
+.pick-empty { color: var(--muted); font-size: 22px; }
 .num {
   background: var(--line);
   border-radius: 50%;
@@ -114,6 +126,7 @@ button.primary {
   display: grid;
   place-items: center;
   font-size: 13px;
+  flex: none;
 }
 .warn { color: var(--bad); font-size: 12px; }
 .item-row { display: flex; gap: 8px; align-items: flex-end; }
@@ -137,6 +150,26 @@ button.primary {
 .type { background: var(--line); border-radius: 4px; padding: 2px 6px; font-size: 12px; }
 .statline { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; font-size: 13px; }
 .slot small { color: var(--muted); font-size: 11px; }
+
+/* Selector visual de Pokémon */
+dialog#picker-dialog { width: min(820px, 94vw); }
+.picker-search { width: 100%; margin-bottom: 10px; }
+.picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: 8px;
+  max-height: 60vh;
+  overflow: auto;
+}
+.picker-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  padding: 6px;
+}
+.picker-tile img { width: 64px; height: 64px; image-rendering: pixelated; }
 
 /* Pokepaste */
 .paste-panel {
@@ -163,7 +196,7 @@ button.primary {
   border-bottom: 1px solid var(--line);
 }
 
-/* Diálogo de importación */
+/* Diálogos */
 dialog {
   background: var(--panel);
   color: var(--text);

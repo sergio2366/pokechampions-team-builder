@@ -3,6 +3,7 @@
 // Equipos guardados: localStorage.
 
 const API = 'https://pokeapi.co/api/v2';
+const SPRITES = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon';
 const SLOT_COUNT = 6;
 const STORE_KEY = 'pc-teams-v2';
 
@@ -30,10 +31,13 @@ const state = {
   regulation: REG.current,
   team: blankTeam(),
   speciesMap: {},   // "Pikachu" -> "pikachu"
+  speciesId: {},   // "Pikachu" -> 25
   itemMap: {},      // "Choice Scarf" -> "choice-scarf"
   itemSprites: {},  // "Choice Scarf" -> url
   details: {},      // slug -> { types, base, abilities, moves, sprite }
 };
+
+let pickIndex = 0;
 
 // ---------- Utilidades ----------
 
@@ -64,6 +68,10 @@ function norm(s) {
 
 function display(slug) {
   return slug.split('-').map(w => w[0].toUpperCase() + w.slice(1)).join(' ');
+}
+
+function spriteUrl(id) {
+  return id ? `${SPRITES}/${id}.png` : '';
 }
 
 function blankTeam() {
@@ -112,6 +120,12 @@ function isAllowedSpecies(species) {
   return set.has(norm(species)) || set.has(norm(slug.split('-')[0]));
 }
 
+function allowedSpeciesNames() {
+  return Object.keys(state.speciesMap)
+    .filter(n => isAllowedSpecies(n))
+    .sort((a, b) => (state.speciesId[a] || 0) - (state.speciesId[b] || 0));
+}
+
 function renderRegulationSelect() {
   $('#reg-select').innerHTML = REG.list
     .map(r => `<option value="${esc(r.id)}" ${r.id === state.regulation ? 'selected' : ''}>${esc(r.name)}</option>`)
@@ -127,8 +141,7 @@ function renderRegulationNote() {
 }
 
 function renderSpeciesList() {
-  $('#dl-species').innerHTML = Object.keys(state.speciesMap)
-    .filter(n => isAllowedSpecies(n))
+  $('#dl-species').innerHTML = allowedSpeciesNames()
     .map(n => `<option value="${esc(n)}">`)
     .join('');
 }
@@ -139,11 +152,37 @@ function renderItemList() {
   $('#dl-items').innerHTML = names.map(n => `<option value="${esc(n)}">`).join('');
 }
 
+// ---------- Selector visual de Pokémon ----------
+
+function openPicker(i) {
+  pickIndex = i;
+  $('#picker-search').value = '';
+  renderPicker('');
+  $('#picker-dialog').showModal();
+  $('#picker-search').focus();
+}
+
+function renderPicker(query) {
+  const term = norm(query);
+  const names = allowedSpeciesNames().filter(n => !term || norm(n).includes(term));
+  $('#picker-grid').innerHTML = names.length
+    ? names.map(n => `
+      <button type="button" class="picker-tile" data-name="${esc(n)}">
+        <img loading="lazy" src="${esc(spriteUrl(state.speciesId[n]))}" alt="">
+        <span>${esc(n)}</span>
+      </button>`).join('')
+    : '<p class="muted">Sin resultados.</p>';
+}
+
 // ---------- Datos (PokeAPI) ----------
 
 async function loadSpeciesIndex() {
   const j = await getJSON(`${API}/pokemon?limit=2000`);
-  j.results.forEach(r => { state.speciesMap[display(r.name)] = r.name; });
+  j.results.forEach(r => {
+    const name = display(r.name);
+    state.speciesMap[name] = r.name;
+    state.speciesId[name] = +r.url.split('/').filter(Boolean).pop();
+  });
   renderSpeciesList();
 }
 
@@ -224,12 +263,17 @@ function slotHTML(i, s) {
   const abilities = d ? d.abilities : (s.ability ? [s.ability] : []);
   const moveOpts = (d ? d.moves : []).map(m => `<option value="${esc(m)}">`).join('');
   const illegal = s.species && !isAllowedSpecies(s.species);
+  const img = s.species && state.speciesId[s.species]
+    ? spriteUrl(state.speciesId[s.species])
+    : '';
 
   return `
   <article class="slot${illegal ? ' illegal' : ''}" data-slot="${i}">
     <div class="slot-head">
       <span class="num">${i + 1}</span>
-      ${d?.sprite ? `<img src="${esc(d.sprite)}" alt="" width="48" height="48">` : ''}
+      <button type="button" class="pick-btn" data-pick="${i}" title="Elegir Pokémon">
+        ${img ? `<img src="${esc(img)}" alt="" width="56" height="56">` : '<span class="pick-empty">+</span>'}
+      </button>
       <input class="species" data-f="species" list="dl-species" value="${esc(s.species)}" placeholder="Pokémon">
     </div>
     ${illegal ? `<small class="warn">No está en ${esc(state.regulation)}</small>` : ''}
@@ -426,6 +470,11 @@ async function importText(text) {
 
 // ---------- Eventos ----------
 
+$('#slots').addEventListener('click', e => {
+  const b = e.target.closest('[data-pick]');
+  if (b) openPicker(+b.dataset.pick);
+});
+
 $('#slots').addEventListener('input', e => {
   const art = e.target.closest('.slot');
   if (!art) return;
@@ -466,6 +515,17 @@ $('#slots').addEventListener('change', async e => {
   }
   updateOutput();
 });
+
+$('#picker-search').addEventListener('input', e => renderPicker(e.target.value));
+
+$('#picker-grid').addEventListener('click', async e => {
+  const tile = e.target.closest('.picker-tile');
+  if (!tile) return;
+  $('#picker-dialog').close();
+  await onSpeciesChanged(pickIndex, tile.dataset.name);
+});
+
+$('#btn-picker-close').addEventListener('click', () => $('#picker-dialog').close());
 
 $('#reg-select').addEventListener('change', e => onRegulationChanged(e.target.value));
 
