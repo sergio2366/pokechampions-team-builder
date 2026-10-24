@@ -26,6 +26,7 @@ const STAT_FROM_API = {
 };
 
 const REG = window.REGULATIONS;
+const ES = window.NAMES_ES || { species: {}, items: {} };
 
 const state = {
   regulation: REG.current,
@@ -72,6 +73,28 @@ function display(slug) {
     .filter(Boolean)
     .map(w => w[0].toUpperCase() + w.slice(1))
     .join(' ');
+}
+
+// Nombre en español para mostrar; el nombre interno sigue siendo el inglés (formato Showdown).
+function esName(kind, english) {
+  const slug = kind === 'species' ? state.speciesMap[english] : state.itemMap[english];
+  return (slug && ES[kind][slug]) || english;
+}
+
+const revNames = { species: new Map(), items: new Map() };
+function buildRev(kind) {
+  const map = kind === 'species' ? state.speciesMap : state.itemMap;
+  revNames[kind].clear();
+  for (const english of Object.keys(map)) {
+    revNames[kind].set(norm(english), english);
+    revNames[kind].set(norm(esName(kind, english)), english);
+  }
+}
+
+// Texto escrito o elegido (español o inglés) -> nombre interno en inglés.
+function fromEs(kind, text) {
+  const t = String(text ?? '').trim();
+  return revNames[kind].get(norm(t)) || t;
 }
 
 function spriteUrl(id) {
@@ -146,7 +169,7 @@ function renderRegulationNote() {
 
 function renderSpeciesList() {
   $('#dl-species').innerHTML = allowedSpeciesNames()
-    .map(n => `<option value="${esc(n)}">`)
+    .map(n => `<option value="${esc(esName('species', n))}">`)
     .join('');
 }
 
@@ -154,7 +177,7 @@ function renderItemList() {
   const reg = currentReg();
   const allowed = reg.items ? new Set(reg.items.map(norm)) : null;
   const names = Object.keys(state.itemMap).filter(n => !allowed || allowed.has(norm(n)));
-  $('#dl-items').innerHTML = names.map(n => `<option value="${esc(n)}">`).join('');
+  $('#dl-items').innerHTML = names.map(n => `<option value="${esc(esName('items', n))}">`).join('');
 }
 
 // ---------- Selector visual de Pokémon ----------
@@ -169,12 +192,13 @@ function openPicker(i) {
 
 function renderPicker(query) {
   const term = norm(query);
-  const names = allowedSpeciesNames().filter(n => !term || norm(n).includes(term));
+  const names = allowedSpeciesNames().filter(n =>
+    !term || norm(n).includes(term) || norm(esName('species', n)).includes(term));
   $('#picker-grid').innerHTML = names.length
     ? names.map(n => `
       <button type="button" class="picker-tile" data-name="${esc(n)}">
         <img loading="lazy" src="${esc(spriteUrl(state.speciesId[n]))}" alt="">
-        <span>${esc(n)}</span>
+        <span>${esc(esName('species', n))}</span>
       </button>`).join('')
     : '<p class="muted">Sin resultados.</p>';
 }
@@ -188,6 +212,7 @@ async function loadSpeciesIndex() {
     state.speciesMap[name] = r.name;
     state.speciesId[name] = +r.url.split('/').filter(Boolean).pop();
   });
+  buildRev('species');
   renderSpeciesList();
 }
 
@@ -196,6 +221,7 @@ async function loadItems() {
   for (let offset = 0; ; offset += pageSize) {
     const j = await getJSON(`${API}/item?limit=${pageSize}&offset=${offset}`);
     j.results.forEach(r => { state.itemMap[display(r.name)] = r.name; });
+    buildRev('items');
     renderItemList();
     if (!j.next) break;
   }
@@ -283,13 +309,13 @@ function slotHTML(i, s) {
       <button type="button" class="pick-btn" data-pick="${i}" title="Elegir Pokémon">
         ${img ? `<img src="${esc(img)}" alt="" width="56" height="56">` : '<span class="pick-empty">+</span>'}
       </button>
-      <input class="species" data-f="species" list="dl-species" value="${esc(s.species)}" placeholder="Pokémon">
+      <input class="species" data-f="species" list="dl-species" value="${esc(esName('species', s.species))}" placeholder="Pokémon">
     </div>
     ${illegal ? `<small class="warn">No está en ${esc(state.regulation)}</small>` : ''}
     <div class="item-row">
       <img class="item-icon" alt="" width="24" height="24" hidden>
       <label>Objeto
-        <input data-f="item" list="dl-items" value="${esc(s.item)}" placeholder="Objeto">
+        <input data-f="item" list="dl-items" value="${esc(esName('items', s.item))}" placeholder="Objeto">
       </label>
     </div>
     <label>Habilidad
@@ -497,7 +523,7 @@ $('#slots').addEventListener('input', e => {
   } else if (el.dataset.move !== undefined) {
     s.moves[+el.dataset.move] = el.value.trim();
   } else if (el.dataset.f === 'item') {
-    s.item = el.value.trim();
+    s.item = fromEs('items', el.value);
   }
   updateOutput();
 });
@@ -510,11 +536,11 @@ $('#slots').addEventListener('change', async e => {
   const f = e.target.dataset.f;
 
   if (f === 'species') {
-    await onSpeciesChanged(i, e.target.value);
+    await onSpeciesChanged(i, fromEs('species', e.target.value));
     return;
   }
   if (f === 'item') {
-    s.item = e.target.value.trim();
+    s.item = fromEs('items', e.target.value);
     refreshItemIcon(i);
   }
   if (f === 'ability') s.ability = e.target.value;
