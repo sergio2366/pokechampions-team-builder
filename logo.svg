@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Logo provisional: sustituir por el logo definitivo -->
+  <circle cx="50" cy="50" r="46" fill="#1a1d24" stroke="#ffcb05" stroke-width="6"/>
+  <path d="M4 50 A46 46 0 0 1 96 50 Z" fill="#e53935"/>
+  <line x1="4" y1="50" x2="96" y2="50" stroke="#111" stroke-width="6"/>
+  <circle cx="50" cy="50" r="12" fill="#fff" stroke="#111" stroke-width="6"/>
+</svg>

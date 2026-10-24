@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pokémon Champions · Creador de equipos</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <a class="brand" href="#builder">
+      <img src="logo.svg" alt="Logo" width="40" height="40">
+      <span>Team Builder</span>
+    </a>
+    <nav class="menu">
+      <a href="#builder">Constructor</a>
+      <a href="#teams">Mis equipos</a>
+      <button class="link" id="btn-import-open" type="button">Importar</button>
+      <a href="#paste-panel">Exportar</a>
+    </nav>
+  </header>
+
+  <main>
+    <section id="builder">
+      <div class="toolbar">
+        <input id="team-name" placeholder="Nombre del equipo">
+        <button id="btn-new" type="button">Nuevo</button>
+        <button id="btn-save" class="primary" type="button">Guardar</button>
+        <div id="status" role="status"></div>
+      </div>
+      <div id="slots" class="slots"></div>
+
+      <section id="paste-panel" class="paste-panel">
+        <h2>Pokepaste</h2>
+        <textarea id="paste-out" rows="14" readonly></textarea>
+        <div class="row">
+          <button id="btn-copy" type="button">Copiar</button>
+          <button id="btn-download" type="button">Descargar .txt</button>
+          <a href="https://pokepast.es/" target="_blank" rel="noopener">Abrir pokepast.es</a>
+        </div>
+      </section>
+    </section>
+
+    <section id="teams">
+      <h2>Mis equipos</h2>
+      <ul id="team-list"></ul>
+    </section>
+  </main>
+
+  <dialog id="import-dialog">
+    <h2>Importar Pokepaste</h2>
+    <p>Pega el texto de un Pokepaste o un enlace <code>pokepast.es/…</code>.</p>
+    <textarea id="import-text" rows="14"></textarea>
+    <menu>
+      <button type="button" id="btn-import-cancel">Cancelar</button>
+      <button type="button" id="btn-import-go" class="primary">Importar</button>
+    </menu>
+  </dialog>
+
+  <footer class="site-footer">
+    <div id="footer-slot" class="footer-slot"></div>
+    <img src="logo.svg" alt="Logo" width="32" height="32">
+  </footer>
+
+  <datalist id="dl-species"></datalist>
+  <datalist id="dl-items"></datalist>
+
+  <script src="pokepaste.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
