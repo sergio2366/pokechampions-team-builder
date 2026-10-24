@@ -35,6 +35,8 @@ const state = {
   speciesId: {},   // "Pikachu" -> 25
   itemMap: {},      // "Choice Scarf" -> "choice-scarf"
   itemSprites: {},  // "Choice Scarf" -> url
+  moveMap: {},     // "Fake Out" -> "fake-out"
+  abilityMap: {},  // "Intimidate" -> "intimidate"
   details: {},      // slug -> { types, base, abilities, moves, sprite }
 };
 
@@ -75,15 +77,22 @@ function display(slug) {
     .join(' ');
 }
 
+const STAT_ES = { hp: 'PS', atk: 'Atq', def: 'Def', spa: 'AtE', spd: 'DfE', spe: 'Vel' };
+
+function kindMap(kind) {
+  return { species: state.speciesMap, items: state.itemMap, moves: state.moveMap, abilities: state.abilityMap }[kind];
+}
+
 // Nombre en español para mostrar; el nombre interno sigue siendo el inglés (formato Showdown).
 function esName(kind, english) {
-  const slug = kind === 'species' ? state.speciesMap[english] : state.itemMap[english];
+  if (kind === 'natures') return ES.natures[english.toLowerCase()] || english;
+  const slug = kindMap(kind)?.[english];
   return (slug && ES[kind][slug]) || english;
 }
 
-const revNames = { species: new Map(), items: new Map() };
+const revNames = { species: new Map(), items: new Map(), moves: new Map(), abilities: new Map() };
 function buildRev(kind) {
-  const map = kind === 'species' ? state.speciesMap : state.itemMap;
+  const map = kindMap(kind);
   revNames[kind].clear();
   for (const english of Object.keys(map)) {
     revNames[kind].set(norm(english), english);
@@ -263,6 +272,10 @@ async function loadDetail(species) {
       moves: p.moves.map(m => display(m.move.name)).sort(),
       sprite: p.sprites?.front_default || '',
     };
+    p.moves.forEach(m => { state.moveMap[display(m.move.name)] = m.move.name; });
+    p.abilities.forEach(a => { state.abilityMap[display(a.ability.name)] = a.ability.name; });
+    buildRev('moves');
+    buildRev('abilities');
   }
   return state.details[slug];
 }
@@ -288,7 +301,7 @@ function calcStats(base, evs, nature) {
 
 function natureLabel(n) {
   const m = NATURES[n];
-  return m ? ` (+${STAT_LABELS[m[0]]} −${STAT_LABELS[m[1]]})` : '';
+  return m ? ` (+${STAT_ES[m[0]]} −${STAT_ES[m[1]]})` : '';
 }
 
 // ---------- Render ----------
@@ -296,7 +309,7 @@ function natureLabel(n) {
 function slotHTML(i, s) {
   const d = detailFor(s.species);
   const abilities = d ? d.abilities : (s.ability ? [s.ability] : []);
-  const moveOpts = (d ? d.moves : []).map(m => `<option value="${esc(m)}">`).join('');
+  const moveOpts = (d ? d.moves : []).map(m => `<option value="${esc(esName('moves', m))}">`).join('');
   const illegal = s.species && !isAllowedSpecies(s.species);
   const img = s.species && state.speciesId[s.species]
     ? spriteUrl(state.speciesId[s.species])
@@ -320,24 +333,24 @@ function slotHTML(i, s) {
     </div>
     <label>Habilidad
       <select data-f="ability">
-        ${abilities.map(a => `<option ${a === s.ability ? 'selected' : ''}>${esc(a)}</option>`).join('')}
+        ${abilities.map(a => `<option value="${esc(a)}" ${a === s.ability ? 'selected' : ''}>${esc(esName('abilities', a))}</option>`).join('')}
       </select>
     </label>
     <label>Naturaleza
       <select data-f="nature">
-        ${Object.keys(NATURES).map(n => `<option value="${n}" ${n === s.nature ? 'selected' : ''}>${n}${natureLabel(n)}</option>`).join('')}
+        ${Object.keys(NATURES).map(n => `<option value="${n}" ${n === s.nature ? 'selected' : ''}>${esc(esName('natures', n))}${natureLabel(n)}</option>`).join('')}
       </select>
     </label>
     <div class="evs">
       ${STAT_KEYS.map(k => `
-        <label>${STAT_LABELS[k]}
+        <label>${STAT_ES[k]}
           <input type="number" min="0" max="${EV_MAX_STAT}" step="4" data-ev="${k}" value="${s.evs[k]}">
         </label>`).join('')}
       <span class="ev-total"></span>
     </div>
     <div class="moves">
       ${s.moves.map((m, j) => `
-        <input data-move="${j}" list="moves-${i}" value="${esc(m)}" placeholder="Movimiento ${j + 1}">`).join('')}
+        <input data-move="${j}" list="moves-${i}" value="${esc(esName('moves', m))}" placeholder="Movimiento ${j + 1}">`).join('')}
     </div>
     <datalist id="moves-${i}">${moveOpts}</datalist>
     <div class="stats"></div>
@@ -350,7 +363,7 @@ function statsHTML(s) {
   const st = calcStats(d.base, s.evs, s.nature);
   return `
     <div class="types">${d.types.map(t => `<span class="type">${esc(t)}</span>`).join('')}</div>
-    <div class="statline">${STAT_KEYS.map(k => `<span><b>${STAT_LABELS[k]}</b> ${st[k]}</span>`).join('')}</div>
+    <div class="statline">${STAT_KEYS.map(k => `<span><b>${STAT_ES[k]}</b> ${st[k]}</span>`).join('')}</div>
     <small>Estimación: nivel 50, IV 31.</small>`;
 }
 
@@ -521,7 +534,7 @@ $('#slots').addEventListener('input', e => {
     s.evs[el.dataset.ev] = clampEV(el.value);
     updateSlotMeta(i);
   } else if (el.dataset.move !== undefined) {
-    s.moves[+el.dataset.move] = el.value.trim();
+    s.moves[+el.dataset.move] = fromEs('moves', el.value);
   } else if (el.dataset.f === 'item') {
     s.item = fromEs('items', el.value);
   }
