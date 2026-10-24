@@ -148,7 +148,8 @@ function renderSpeciesList() {
 
 function renderItemList() {
   const reg = currentReg();
-  const names = reg.items ?? Object.keys(state.itemMap);
+  const allowed = reg.items ? new Set(reg.items.map(norm)) : null;
+  const names = Object.keys(state.itemMap).filter(n => !allowed || allowed.has(norm(n)));
   $('#dl-items').innerHTML = names.map(n => `<option value="${esc(n)}">`).join('');
 }
 
