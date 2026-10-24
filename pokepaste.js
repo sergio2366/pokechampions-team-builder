@@ -3,6 +3,11 @@
 const STAT_KEYS = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
 const STAT_LABELS = { hp: 'HP', atk: 'Atk', def: 'Def', spa: 'SpA', spd: 'SpD', spe: 'Spe' };
 
+// Pokémon Champions usa puntos de estadística (PC). En el Pokepaste se exportan como EVs equivalentes:
+// el primer PC cuesta 4 EVs y cada PC adicional 8.
+function pcToEv(n) { return n > 0 ? 4 + 8 * (n - 1) : 0; }
+function evToPc(ev) { return ev > 0 ? Math.min(32, Math.round((ev - 4) / 8) + 1) : 0; }
+
 function emptySet() {
   return {
     species: '',
@@ -27,7 +32,7 @@ function toPaste(set) {
   if (set.ability) lines.push(`Ability: ${set.ability}`);
   if (set.level && set.level !== 50) lines.push(`Level: ${set.level}`);
 
-  const evs = STAT_KEYS.filter(k => set.evs[k] > 0).map(k => `${set.evs[k]} ${STAT_LABELS[k]}`);
+  const evs = STAT_KEYS.filter(k => set.evs[k] > 0).map(k => `${pcToEv(set.evs[k])} ${STAT_LABELS[k]}`);
   if (evs.length) lines.push(`EVs: ${evs.join(' / ')}`);
 
   if (set.nature) lines.push(`${set.nature} Nature`);
@@ -73,7 +78,7 @@ function parseBlock(block) {
       set.level = parseInt(line.split(':')[1], 10) || 50;
     } else if (/^EVs:/i.test(line)) {
       for (const [, v, k] of line.matchAll(/(\d+)\s*(HP|Atk|Def|SpA|SpD|Spe)/gi)) {
-        set.evs[k.toLowerCase()] = parseInt(v, 10);
+        set.evs[k.toLowerCase()] = evToPc(parseInt(v, 10));
       }
     } else if (/ Nature$/i.test(line)) {
       set.nature = line.replace(/ Nature$/i, '');

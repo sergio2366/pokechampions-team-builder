@@ -7,9 +7,9 @@ const SPRITES = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprite
 const SLOT_COUNT = 6;
 const STORE_KEY = 'pc-teams-v2';
 
-// Reglas de EVs (serie principal). Ajustar a las reglas reales de Pokémon Champions.
-const EV_MAX_STAT = 252;
-const EV_MAX_TOTAL = 510;
+// Pokémon Champions: puntos de estadística (PC), nivel 50 e IV 31 fijos.
+const PC_MAX_STAT = 32;
+const PC_MAX_TOTAL = 66;
 
 // Naturalezas: [stat subido, stat bajado], o null si es neutra.
 const NATURES = {
@@ -119,7 +119,7 @@ function sumEV(evs) {
 }
 
 function clampEV(v) {
-  return Math.max(0, Math.min(EV_MAX_STAT, parseInt(v, 10) || 0));
+  return Math.max(0, Math.min(PC_MAX_STAT, parseInt(v, 10) || 0));
 }
 
 function detailFor(species) {
@@ -286,7 +286,7 @@ function calcStats(base, evs, nature) {
   const mod = NATURES[nature];
   for (const k of STAT_KEYS) {
     const b = base[k];
-    const ev = Math.floor((evs[k] || 0) / 4);
+    const ev = Math.floor(pcToEv(evs[k] || 0) / 4);
     if (k === 'hp') {
       out[k] = Math.floor((2 * b + 31 + ev) * 50 / 100) + 60;
     } else {
@@ -344,7 +344,7 @@ function slotHTML(i, s) {
     <div class="evs">
       ${STAT_KEYS.map(k => `
         <label>${STAT_ES[k]}
-          <input type="number" min="0" max="${EV_MAX_STAT}" step="4" data-ev="${k}" value="${s.evs[k]}">
+          <input type="number" min="0" max="${PC_MAX_STAT}" step="1" data-ev="${k}" value="${s.evs[k]}">
         </label>`).join('')}
       <span class="ev-total"></span>
     </div>
@@ -373,8 +373,8 @@ function updateSlotMeta(i) {
   const s = state.team[i];
   const total = sumEV(s.evs);
   const t = art.querySelector('.ev-total');
-  t.textContent = `EVs: ${total}/${EV_MAX_TOTAL}`;
-  t.classList.toggle('bad', total > EV_MAX_TOTAL);
+  t.textContent = `PC: ${total}/${PC_MAX_TOTAL}`;
+  t.classList.toggle('bad', total > PC_MAX_TOTAL);
   art.querySelector('.stats').innerHTML = statsHTML(s);
 }
 
