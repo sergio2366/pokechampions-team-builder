@@ -1,5 +1,5 @@
 // Datos de regulaciones de Pokémon Champions.
-// M-C: lista construida desde Serebii. Pendiente: confirmar #0859 (Impidimp) y #0860 (Morgrem).
+// M-C: lista construida desde Serebii, solo evoluciones finales (las preevoluciones no están permitidas).
 window.REGULATIONS = {
   current: 'M-C',
   list: [
@@ -9,7 +9,7 @@ window.REGULATIONS = {
       start: '2026-09-09',
       end: '2026-12-02',
       complete: false,
-      note: 'Lista pendiente de revisión: puede faltar algún Pokémon (p. ej. Impidimp y Morgrem).',
+      note: 'Lista pendiente de revisión: solo evoluciones finales.',
       sources: [
         'https://serebii.net/pokemonchampions/rankedbattle/regulationm-c.shtml',
         'https://www.serebii.net/pokemonchampions/recruit/regularrosterm-c.shtml',
