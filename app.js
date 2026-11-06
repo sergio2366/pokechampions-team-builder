@@ -640,6 +640,21 @@ function baseSpecies(name) {
     .replace(/^(Alolan|Hisuian|Galarian|Paldean) /, '');
 }
 
+// Nombre de la especie tal como está en la lista de Pokémon (PokeAPI usa formas como basculegion-male).
+function resolveSpecies(name) {
+  const base = baseSpecies(name);
+  if (state.speciesMap[base]) return base;
+  const slug = slugOf(base);
+  const keys = Object.keys(state.speciesMap).filter(k => {
+    const ks = state.speciesMap[k];
+    return ks === slug || ks.startsWith(slug + '-');
+  });
+  if (!keys.length) return null;
+  const female = /-F$/.test(name);
+  const isFemale = k => /female/i.test(state.speciesMap[k]);
+  return keys.find(k => isFemale(k) === female) || keys[0];
+}
+
 function usageData() {
   return window.USAGE?.[state.regulation] || null;
 }
@@ -685,8 +700,8 @@ function renderUsageDetail() {
     return;
   }
   const max = Math.max(...list.map(x => x.pct));
-  const base = baseSpecies(p.name);
-  const img = state.speciesId[base] ? spriteUrl(state.speciesId[base]) : '';
+  const key = resolveSpecies(p.name);
+  const img = key && state.speciesId[key] ? spriteUrl(state.speciesId[key]) : '';
   el.innerHTML = `
     <div class="usage-head">
       ${img ? `<img src="${esc(img)}" alt="" width="72" height="72">` : ''}
@@ -710,17 +725,17 @@ async function addUsageToTeam() {
     flash('El equipo ya está completo');
     return;
   }
-  const base = baseSpecies(p.name);
-  if (!state.speciesMap[base]) {
-    flash(`${base} no está en la lista de Pokémon`);
+  const key = resolveSpecies(p.name);
+  if (!key) {
+    flash(`No encuentro ${baseSpecies(p.name)} en la lista de Pokémon`);
     return;
   }
-  await onSpeciesChanged(i, base);
+  await onSpeciesChanged(i, key);
   state.team[i].item = p.item;
   state.team[i].moves = [...p.moves, '', ''].slice(0, 4);
   renderSlot(i);
   updateOutput();
-  flash(`Añadido ${esName('species', base)} al hueco ${i + 1}`);
+  flash(`Añadido ${esName('species', key)} al hueco ${i + 1}`);
 }
 
 $('#usage-list').addEventListener('click', e => {
