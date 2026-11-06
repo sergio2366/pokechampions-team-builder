@@ -5,7 +5,7 @@ window.USAGE = {
   "sourceName": "poketools.com",
   "source": "https://www.poketools.com/champions-tier-list",
   "snapshot": "2026-10",
-  "note": "Porcentaje = proporción de equipos en los que aparece cada Pokémon. Objeto y movimientos son los más usados.",
+  "note": "Porcentaje = proporción de equipos en los que aparece cada Pokémon. Objeto y movimientos son los del set más usado (4 movimientos).",
   "pokemon": [
    {
     "name": "Sneasler",
@@ -14,7 +14,8 @@ window.USAGE = {
     "moves": [
      "Close Combat",
      "Dire Claw",
-     "Fake Out"
+     "Fake Out",
+     "Protect"
     ]
    },
    {
@@ -24,7 +25,8 @@ window.USAGE = {
     "moves": [
      "Kowtow Cleave",
      "Sucker Punch",
-     "Iron Head"
+     "Iron Head",
+     "Low Kick"
     ]
    },
    {
@@ -34,7 +36,8 @@ window.USAGE = {
     "moves": [
      "Last Respects",
      "Aqua Jet",
-     "Wave Crash"
+     "Wave Crash",
+     "Protect"
     ]
    },
    {
@@ -44,7 +47,8 @@ window.USAGE = {
     "moves": [
      "Heat Wave",
      "Weather Ball",
-     "Protect"
+     "Protect",
+     "Ancient Power"
     ]
    },
    {
@@ -54,7 +58,8 @@ window.USAGE = {
     "moves": [
      "Grassy Glide",
      "Fake Out",
-     "Wood Hammer"
+     "Wood Hammer",
+     "U-turn"
     ]
    },
    {
@@ -64,7 +69,8 @@ window.USAGE = {
     "moves": [
      "Fake Out",
      "Parting Shot",
-     "Flare Blitz"
+     "Flare Blitz",
+     "Darkest Lariat"
     ]
    },
    {
@@ -74,7 +80,8 @@ window.USAGE = {
     "moves": [
      "Dragon Claw",
      "Rock Slide",
-     "Stomping Tantrum"
+     "Stomping Tantrum",
+     "Earthquake"
     ]
    },
    {
@@ -84,7 +91,8 @@ window.USAGE = {
     "moves": [
      "Trick Room",
      "Psychic",
-     "Thunderbolt"
+     "Thunderbolt",
+     "Helping Hand"
     ]
    },
    {
@@ -94,7 +102,8 @@ window.USAGE = {
     "moves": [
      "Protect",
      "Electro Shot",
-     "Dragon Pulse"
+     "Dragon Pulse",
+     "Flash Cannon"
     ]
    },
    {
@@ -104,7 +113,8 @@ window.USAGE = {
     "moves": [
      "Follow Me",
      "Helping Hand",
-     "Psychic"
+     "Psychic",
+     "Trick Room"
     ]
    },
    {
@@ -114,7 +124,8 @@ window.USAGE = {
     "moves": [
      "Protect",
      "Dazzling Gleam",
-     "Moonblast"
+     "Moonblast",
+     "Calm Mind"
     ]
    },
    {
@@ -124,7 +135,8 @@ window.USAGE = {
     "moves": [
      "Dragon Pulse",
      "Heat Wave",
-     "Tailwind"
+     "Tailwind",
+     "Extreme Speed"
     ]
    },
    {
@@ -134,7 +146,8 @@ window.USAGE = {
     "moves": [
      "Hyper Voice",
      "Psychic",
-     "Protect"
+     "Protect",
+     "Trick Room"
     ]
    },
    {
@@ -144,7 +157,8 @@ window.USAGE = {
     "moves": [
      "Hurricane",
      "Weather Ball",
-     "Wide Guard"
+     "Wide Guard",
+     "Tailwind"
     ]
    },
    {
@@ -154,7 +168,8 @@ window.USAGE = {
     "moves": [
      "Hyper Voice",
      "Detect",
-     "Hyper Beam"
+     "Hyper Beam",
+     "Quick Attack"
     ]
    },
    {
@@ -164,7 +179,8 @@ window.USAGE = {
     "moves": [
      "Blizzard",
      "Shadow Ball",
-     "Aurora Veil"
+     "Aurora Veil",
+     "Protect"
     ]
    },
    {
@@ -174,7 +190,8 @@ window.USAGE = {
     "moves": [
      "Zap Cannon",
      "Protect",
-     "Focus Blast"
+     "Focus Blast",
+     "Fake Out"
     ]
    },
    {
@@ -184,7 +201,8 @@ window.USAGE = {
     "moves": [
      "Make It Rain",
      "Shadow Ball",
-     "Protect"
+     "Protect",
+     "Nasty Plot"
     ]
    },
    {
@@ -194,7 +212,8 @@ window.USAGE = {
     "moves": [
      "Tailwind",
      "Moonblast",
-     "Encore"
+     "Encore",
+     "Protect"
     ]
    },
    {
@@ -204,7 +223,8 @@ window.USAGE = {
     "moves": [
      "Protect",
      "Hyper Voice",
-     "Tailwind"
+     "Tailwind",
+     "Draco Meteor"
     ]
    },
    {
@@ -214,7 +234,8 @@ window.USAGE = {
     "moves": [
      "Protect",
      "Power Gem",
-     "Earth Power"
+     "Earth Power",
+     "Dragon Pulse"
     ]
    },
    {
@@ -224,27 +245,30 @@ window.USAGE = {
     "moves": [
      "Leech Life",
      "Iron Head",
-     "Protect"
+     "Protect",
+     "Sucker Punch"
     ]
    },
    {
     "name": "Kommo-o",
     "pct": 8.1,
-    "item": "Life Orb",
+    "item": "Leftovers",
     "moves": [
      "Protect",
      "Clanging Scales",
-     "Aura Sphere"
+     "Aura Sphere",
+     "Clangorous Soul"
     ]
    },
    {
     "name": "Volcarona",
     "pct": 7.1,
-    "item": "Rocky Helmet",
+    "item": "Grassy Seed",
     "moves": [
+     "Protect",
      "Rage Powder",
      "Struggle Bug",
-     "Protect"
+     "Quiver Dance"
     ]
    },
    {
@@ -254,7 +278,8 @@ window.USAGE = {
     "moves": [
      "Sludge Bomb",
      "Protect",
-     "Leaf Storm"
+     "Leaf Storm",
+     "Sleep Powder"
     ]
    },
    {
@@ -264,7 +289,8 @@ window.USAGE = {
     "moves": [
      "Expanding Force",
      "Armor Cannon",
-     "Protect"
+     "Protect",
+     "Wide Guard"
     ]
    },
    {
@@ -274,7 +300,8 @@ window.USAGE = {
     "moves": [
      "Close Combat",
      "Protect",
-     "Brave Bird"
+     "Brave Bird",
+     "Tailwind"
     ]
    },
    {
@@ -284,7 +311,8 @@ window.USAGE = {
     "moves": [
      "Earth Power",
      "Power Gem",
-     "Dragon Pulse"
+     "Dragon Pulse",
+     "Flamethrower"
     ]
    },
    {
@@ -294,7 +322,8 @@ window.USAGE = {
     "moves": [
      "Parting Shot",
      "Light Screen",
-     "Reflect"
+     "Reflect",
+     "Spirit Break"
     ]
    },
    {
@@ -304,7 +333,8 @@ window.USAGE = {
     "moves": [
      "Blizzard",
      "Freeze-Dry",
-     "Aurora Veil"
+     "Aurora Veil",
+     "Rain Dance"
     ]
    },
    {
@@ -314,7 +344,8 @@ window.USAGE = {
     "moves": [
      "Protect",
      "Shadow Ball",
-     "Sludge Bomb"
+     "Sludge Bomb",
+     "Perish Song"
     ]
    },
    {
@@ -324,17 +355,19 @@ window.USAGE = {
     "moves": [
      "Protect",
      "Scald",
+     "Ice Beam",
      "Muddy Water"
     ]
    },
    {
     "name": "Basculegion-F",
     "pct": 5.0,
-    "item": "Focus Sash",
+    "item": "Life Orb",
     "moves": [
      "Shadow Ball",
      "Muddy Water",
-     "Ice Beam"
+     "Ice Beam",
+     "Protect"
     ]
    },
    {
@@ -344,7 +377,8 @@ window.USAGE = {
     "moves": [
      "Rage Powder",
      "Matcha Gotcha",
-     "Protect"
+     "Protect",
+     "Trick Room"
     ]
    },
    {
@@ -354,7 +388,8 @@ window.USAGE = {
     "moves": [
      "Psychic Fangs",
      "Protect",
-     "Body Press"
+     "Body Press",
+     "Stomping Tantrum"
     ]
    },
    {
@@ -364,7 +399,8 @@ window.USAGE = {
     "moves": [
      "Protect",
      "Weather Ball",
-     "Muddy Water"
+     "Muddy Water",
+     "Ice Beam"
     ]
    },
    {
@@ -374,7 +410,8 @@ window.USAGE = {
     "moves": [
      "Flare Blitz",
      "Protect",
-     "Head Smash"
+     "Head Smash",
+     "Extreme Speed"
     ]
    },
    {
@@ -384,7 +421,8 @@ window.USAGE = {
     "moves": [
      "Fake Out",
      "Volt Tackle",
-     "Volt Switch"
+     "Volt Switch",
+     "Feint"
     ]
    },
    {
@@ -394,7 +432,8 @@ window.USAGE = {
     "moves": [
      "Protect",
      "Hyper Voice",
-     "Moonblast"
+     "Moonblast",
+     "Calm Mind"
     ]
    },
    {
@@ -404,7 +443,8 @@ window.USAGE = {
     "moves": [
      "Rock Slide",
      "Protect",
-     "Knock Off"
+     "Knock Off",
+     "Low Kick"
     ]
    }
   ]
