@@ -430,6 +430,8 @@ function refreshRegulationViews() {
   renderItemList();
   renderSlots();
   updateOutput();
+  renderUsageList();
+  renderUsageDetail();
 }
 
 function onRegulationChanged(id) {
@@ -617,6 +619,124 @@ $('#btn-import-go').addEventListener('click', async () => {
   await importText(text);
 });
 
+// ---------- Pokémon más usados ----------
+
+const USAGE_STATE = { sel: 0 };
+
+function slugOf(text) {
+  return String(text).replace(/'/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+function esBySlug(kind, english) {
+  return (ES[kind] && ES[kind][slugOf(english)]) || english;
+}
+
+// "Mega Charizard Y" -> "Charizard", "Indeedee-F" -> "Indeedee", "Alolan Ninetales" -> "Ninetales"
+function baseSpecies(name) {
+  return name
+    .replace(/-F$/, '')
+    .replace(/^Mega /, '')
+    .replace(/ [XYZ]$/, '')
+    .replace(/^(Alolan|Hisuian|Galarian|Paldean) /, '');
+}
+
+function usageData() {
+  return window.USAGE?.[state.regulation] || null;
+}
+
+function usageEntries() {
+  return usageData()?.pokemon || [];
+}
+
+function usageLabel(p) {
+  const base = baseSpecies(p.name);
+  const sp = esName('species', base);
+  return base === p.name ? sp : `${sp} (${p.name})`;
+}
+
+function renderUsageList() {
+  const data = usageData();
+  if (!data) {
+    $('#usage-meta').textContent = 'No hay datos de uso para esta regulación.';
+    $('#usage-list').innerHTML = '';
+    return;
+  }
+  $('#usage-meta').innerHTML = `${esc(data.format)}. Fuente: <a href="${esc(data.source)}" target="_blank" rel="noopener">${esc(data.sourceName)}</a>. ${esc(data.note)}`;
+
+  const term = norm($('#usage-search').value);
+  const rows = usageEntries()
+    .map((p, i) => ({ p, i }))
+    .filter(({ p }) => !term || norm(usageLabel(p)).includes(term) || norm(p.name).includes(term));
+
+  $('#usage-list').innerHTML = rows.length
+    ? rows.map(({ p, i }) => `
+      <li><button type="button" data-u="${i}" class="${i === USAGE_STATE.sel ? 'active' : ''}">
+        <span>${i + 1}. ${esc(usageLabel(p))}</span><b>${p.pct.toFixed(1)}%</b>
+      </button></li>`).join('')
+    : '<li class="muted">Sin resultados.</li>';
+}
+
+function renderUsageDetail() {
+  const list = usageEntries();
+  const p = list[USAGE_STATE.sel];
+  const el = $('#usage-detail');
+  if (!p) {
+    el.innerHTML = '<p class="muted">Elige un Pokémon de la lista para ver su uso.</p>';
+    return;
+  }
+  const max = Math.max(...list.map(x => x.pct));
+  const base = baseSpecies(p.name);
+  const img = state.speciesId[base] ? spriteUrl(state.speciesId[base]) : '';
+  el.innerHTML = `
+    <div class="usage-head">
+      ${img ? `<img src="${esc(img)}" alt="" width="72" height="72">` : ''}
+      <div>
+        <h3>${esc(usageLabel(p))}</h3>
+        <p class="muted">Aparece en el ${p.pct.toFixed(1)}% de los equipos (puesto ${USAGE_STATE.sel + 1})</p>
+      </div>
+    </div>
+    <div class="usage-bar"><span style="width:${(p.pct / max * 100).toFixed(1)}%"></span></div>
+    <p><b>Objeto más usado:</b> ${esc(esBySlug('items', p.item))}</p>
+    <p><b>Movimientos más usados:</b></p>
+    <ol>${p.moves.map(m => `<li>${esc(esBySlug('moves', m))}</li>`).join('')}</ol>
+    <button type="button" id="btn-usage-use" class="primary">Añadir al primer hueco libre</button>`;
+}
+
+async function addUsageToTeam() {
+  const p = usageEntries()[USAGE_STATE.sel];
+  if (!p) return;
+  const i = state.team.findIndex(s => !s.species);
+  if (i === -1) {
+    flash('El equipo ya está completo');
+    return;
+  }
+  const base = baseSpecies(p.name);
+  if (!state.speciesMap[base]) {
+    flash(`${base} no está en la lista de Pokémon`);
+    return;
+  }
+  await onSpeciesChanged(i, base);
+  state.team[i].item = p.item;
+  state.team[i].moves = [...p.moves, '', ''].slice(0, 4);
+  renderSlot(i);
+  updateOutput();
+  flash(`Añadido ${esName('species', base)} al hueco ${i + 1}`);
+}
+
+$('#usage-list').addEventListener('click', e => {
+  const b = e.target.closest('[data-u]');
+  if (!b) return;
+  USAGE_STATE.sel = +b.dataset.u;
+  renderUsageList();
+  renderUsageDetail();
+});
+
+$('#usage-search').addEventListener('input', renderUsageList);
+
+$('#usage-detail').addEventListener('click', e => {
+  if (e.target.id === 'btn-usage-use') addUsageToTeam();
+});
+
 // ---------- Init ----------
 
 async function init() {
@@ -625,9 +745,15 @@ async function init() {
   renderSlots();
   updateOutput();
   renderTeamList();
+  renderUsageList();
+  renderUsageDetail();
 
   loadSpeciesIndex()
-    .then(() => renderSlots())
+    .then(() => {
+      renderSlots();
+      renderUsageList();
+      renderUsageDetail();
+    })
     .catch(() => flash('No se pudo cargar la lista de Pokémon (PokeAPI)'));
   loadItems().catch(err => flash(`No se pudo cargar la lista de objetos: ${err.message}`));
 }

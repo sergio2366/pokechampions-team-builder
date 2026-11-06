@@ -171,6 +171,43 @@ dialog#picker-dialog { width: min(820px, 94vw); }
 }
 .picker-tile img { width: 64px; height: 64px; image-rendering: pixelated; }
 
+/* Pokémon más usados */
+#usage { margin-top: 32px; }
+.usage-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+.usage-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 60vh;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.usage-list button {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  text-align: left;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: none;
+  padding: 8px 12px;
+}
+.usage-list button.active { background: var(--line); color: var(--accent); }
+.usage-detail {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px;
+}
+.usage-head { display: flex; gap: 12px; align-items: center; }
+.usage-head h3 { margin: 0; }
+.usage-bar { height: 6px; background: var(--line); border-radius: 3px; margin: 10px 0 14px; overflow: hidden; }
+.usage-bar span { display: block; height: 100%; background: var(--accent); }
+.usage-detail ol { margin: 4px 0 14px; padding-left: 20px; }
+
 /* Pokepaste */
 .paste-panel {
   margin-top: 24px;
@@ -221,4 +258,5 @@ dialog menu { display: flex; justify-content: flex-end; gap: 10px; padding: 0; m
 @media (max-width: 700px) {
   .site-header { flex-direction: column; gap: 8px; }
   .evs { grid-template-columns: repeat(3, 1fr); }
+  .usage-layout { grid-template-columns: 1fr; }
 }

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Pokémon Champions · Creador de equipos</title>
-  <link rel="stylesheet" href="styles.css?v=5">
+  <link rel="stylesheet" href="styles.css?v=8">
 </head>
 <body>
 
@@ -50,6 +50,15 @@
       <h2>Mis equipos</h2>
       <ul id="team-list"></ul>
     </section>
+    <section id="usage">
+      <h2>Pokémon más usados</h2>
+      <p id="usage-meta" class="reg-note"></p>
+      <input id="usage-search" placeholder="Buscar Pokémon" class="picker-search">
+      <div class="usage-layout">
+        <ul id="usage-list" class="usage-list"></ul>
+        <div id="usage-detail" class="usage-detail"></div>
+      </div>
+    </section>
   </main>
 
   <dialog id="import-dialog">
@@ -79,9 +88,10 @@
   <datalist id="dl-species"></datalist>
   <datalist id="dl-items"></datalist>
 
-  <script src="data/regulations.js?v=5"></script>
-  <script src="data/names-es.js?v=6"></script>
-  <script src="pokepaste.js?v=7"></script>
-  <script src="app.js?v=7"></script>
+  <script src="data/regulations.js?v=8"></script>
+  <script src="data/names-es.js?v=8"></script>
+  <script src="data/usage.js?v=8"></script>
+  <script src="pokepaste.js?v=8"></script>
+  <script src="app.js?v=8"></script>
 </body>
 </html>
